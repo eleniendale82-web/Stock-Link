@@ -1,0 +1,2 @@
+// Categories API routes
+export {}

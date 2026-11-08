@@ -1,0 +1,2 @@
+// Businesses API routes
+export {}

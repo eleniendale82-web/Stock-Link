@@ -1,0 +1,2 @@
+// Inquiries API routes
+export {}

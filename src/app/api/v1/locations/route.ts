@@ -1,0 +1,2 @@
+// Locations API routes
+export {}
