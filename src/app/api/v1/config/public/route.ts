@@ -1,8 +1,19 @@
-import { NextResponse } from 'next/server'
+import { getPublicConfig } from '@/features/config/config.service'
+import { handleApiError } from '@/lib/api-error'
+import { successResponse } from '@/lib/api-response'
 
-export async function GET() {
-  return NextResponse.json({
-    appName: 'StockLink',
-    version: '1.0.0',
-  })
+export const dynamic = 'force-dynamic'
+
+export function GET() {
+  try {
+    return successResponse(
+      getPublicConfig(),
+      200,
+      'Public configuration retrieved successfully',
+      null,
+      { 'Cache-Control': 'public, max-age=300, stale-while-revalidate=60' }
+    )
+  } catch (error) {
+    return handleApiError(error, { 'Cache-Control': 'no-store' })
+  }
 }

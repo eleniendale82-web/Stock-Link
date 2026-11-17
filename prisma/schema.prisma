@@ -1,11 +1,73 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Prisma schema — SQLite for local development
+// Switch provider to "postgresql" and restore Decimal/@db.Decimal for production
 
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          String     @id @default(uuid())
+  name        String
+  slug        String     @unique
+  description String?
+  parentId    String?
+  image       String?
+  isActive    Boolean    @default(true)
+  deletedAt   DateTime?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  children    Category[] @relation("CategoryHierarchy")
+  products    Product[]
+
+  @@index([parentId])
+  @@index([isActive, deletedAt])
+  @@map("categories")
+}
+
+model Business {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  ownerId     String
+  logo        String?
+  verified    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  products    Product[]
+
+  @@index([ownerId])
+  @@index([deletedAt])
+  @@map("businesses")
+}
+
+model Product {
+  id          String    @id @default(uuid())
+  name        String
+  description String?
+  // SQLite has no Decimal type — use Float; switch to Decimal @db.Decimal(12,2) for Postgres
+  price       Float
+  // SQLite has no array type — images stored as JSON string "[]"
+  images      String    @default("[]")
+  categoryId  String
+  businessId  String
+  sku         String?
+  barcode     String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  business    Business  @relation(fields: [businessId], references: [id], onDelete: Restrict)
+
+  @@index([categoryId])
+  @@index([businessId])
+  @@index([createdAt])
+  @@index([deletedAt])
+  @@map("products")
 }
