@@ -1,40 +1,35 @@
-// Prisma schema — SQLite for local development
-// Switch provider to "postgresql" and restore Decimal/@db.Decimal for production
-
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mongodb"
   url      = env("DATABASE_URL")
 }
 
 model Category {
-  id          String     @id @default(uuid())
+  id          String     @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   slug        String     @unique
   description String?
-  parentId    String?
+  parentId    String?    @db.ObjectId
   image       String?
   isActive    Boolean    @default(true)
   deletedAt   DateTime?
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
-  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  parent      Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   children    Category[] @relation("CategoryHierarchy")
   products    Product[]
 
-  @@index([parentId])
-  @@index([isActive, deletedAt])
   @@map("categories")
 }
 
 model Business {
-  id          String    @id @default(uuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
-  ownerId     String
+  ownerId     String    @db.ObjectId
   logo        String?
   verified    Boolean   @default(false)
   createdAt   DateTime  @default(now())
@@ -42,32 +37,24 @@ model Business {
   deletedAt   DateTime?
   products    Product[]
 
-  @@index([ownerId])
-  @@index([deletedAt])
   @@map("businesses")
 }
 
 model Product {
-  id          String    @id @default(uuid())
+  id          String    @id @default(auto()) @map("_id") @db.ObjectId
   name        String
   description String?
-  // SQLite has no Decimal type — use Float; switch to Decimal @db.Decimal(12,2) for Postgres
   price       Float
-  // SQLite has no array type — images stored as JSON string "[]"
-  images      String    @default("[]")
-  categoryId  String
-  businessId  String
+  images      String[]  @default([])
+  categoryId  String    @db.ObjectId
+  businessId  String    @db.ObjectId
   sku         String?
   barcode     String?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
-  category    Category  @relation(fields: [categoryId], references: [id], onDelete: Restrict)
-  business    Business  @relation(fields: [businessId], references: [id], onDelete: Restrict)
+  category    Category  @relation(fields: [categoryId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  business    Business  @relation(fields: [businessId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
-  @@index([categoryId])
-  @@index([businessId])
-  @@index([createdAt])
-  @@index([deletedAt])
   @@map("products")
 }

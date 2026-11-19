@@ -25,7 +25,7 @@ async function checkDatabase() {
 
   try {
     await Promise.race([
-      prisma.$queryRaw`SELECT 1`,
+      prisma.$runCommandRaw({ ping: 1 }),
       new Promise<never>((_, reject) => {
         timeout = setTimeout(() => reject(new Error('Health check database timeout')), DATABASE_TIMEOUT_MS)
         timeout.unref?.()

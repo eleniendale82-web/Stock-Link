@@ -59,8 +59,7 @@ export async function getProducts(query: ProductQuery) {
     products: products.map((product) => ({
       ...product,
       price: Number(product.price),
-      // SQLite stores images as a JSON string; parse it back to an array
-      images: (() => { try { const v = JSON.parse(product.images as unknown as string); return Array.isArray(v) ? v : [] } catch { return [] } })(),
+      images: product.images,
     })),
     pagination: {
       page: query.page,
