@@ -45,15 +45,10 @@ export async function getPublicProductById(id: string) {
   if (!product) return null
 
   const { business, price, ...publicProduct } = product
-  // SQLite stores images as a JSON string; parse it back to an array for Postgres compat
-  const rawImages = publicProduct.images as unknown as string
-  const imagesArray: string[] = (() => {
-    try { const v = JSON.parse(rawImages); return Array.isArray(v) ? v : [] } catch { return [] }
-  })()
   return {
     ...publicProduct,
     price: Number(price),
-    images: imagesArray.filter(isPublicAssetReference),
+    images: publicProduct.images.filter(isPublicAssetReference),
     shop: {
       id: business.id,
       name: business.name,

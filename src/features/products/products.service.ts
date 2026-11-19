@@ -11,9 +11,9 @@ export async function getProducts(query: ProductQuery) {
     ...(query.search
       ? {
           OR: [
-            { name: { contains: query.search } },
-            { description: { contains: query.search } },
-            { sku: { contains: query.search } },
+            { name: { contains: query.search, mode: 'insensitive' } },
+            { description: { contains: query.search, mode: 'insensitive' } },
+            { sku: { contains: query.search, mode: 'insensitive' } },
           ],
         }
       : {}),
